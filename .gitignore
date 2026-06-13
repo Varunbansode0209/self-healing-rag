@@ -1,4 +1,9 @@
-#Enviornment variables - NEVER commit this .env
+# Environment variables
+.env
+
+# Raw Datasets / Data sources
+documents/
+
 # Virtual environment
 venv/
 
@@ -10,6 +15,6 @@ __pycache__/
 # Vector store 
 chroma_db/
 
-#OS files
+# OS files
 .DS_Store
 Thumbs.db
