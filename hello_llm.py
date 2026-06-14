@@ -4,12 +4,12 @@ import os
 
 load_dotenv()
 
-llm = ChatGroq(
+client = ChatGroq(
     model="llama-3.1-8b-instant",
     api_key=os.getenv("GROQ_API_KEY")
 )
 
-response = llm.invoke(
+response = client.invoke(
     [
         ("system", "You are a helpful assistant."),
         ("human", "Say hello and tell me what you are.")
