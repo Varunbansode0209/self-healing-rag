@@ -1,17 +1,7 @@
-# app.py
-# ============================================================
-# Basic RAG Chat UI — Phase 2
-# Run with: streamlit run app.py
-# ============================================================
 
 import streamlit as st
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
-from langchain_groq import ChatGroq
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
-import os
+from graph import build_graph, GraphState
 
 load_dotenv()
 
@@ -22,84 +12,42 @@ st.set_page_config(
     layout="wide"
 )
 
-# ── LOAD MODELS (cached so they don't reload every message) ──
+# ── LOAD GRAPH (cached — compiled once, reused every call) ────
 @st.cache_resource
-def load_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="BAAI/bge-small-en-v1.5",
-        model_kwargs={"device": "cuda"},
-        encode_kwargs={"normalize_embeddings": True}
-    )
+def get_graph():
+    return build_graph()
 
-@st.cache_resource
-def load_llm():
-    return ChatGroq(
-        model="llama-3.1-8b-instant",
-        temperature=0,
-        api_key=os.getenv("GROQ_API_KEY")
-    )
-
-@st.cache_resource
-def load_vectorstore(domain: str):
-    return Chroma(
-        persist_directory=f"./chroma_db/{domain}",
-        embedding_function=load_embeddings(),
-        collection_name=domain
-    )
-
-# ── RAG CHAIN ─────────────────────────────────────────────────
+# ── RAG via LangGraph pipeline ────────────────────────────────
 def get_answer(question: str, domain: str) -> dict:
     """
-    Basic RAG — no self-healing yet.
-    Phase 3 will replace this with the LangGraph pipeline.
+    Runs the question through the self-healing LangGraph pipeline.
+    Returns answer, retrieved chunks, and retry count.
     """
-    # Step 1 — Retrieve
-    vectorstore = load_vectorstore(domain)
-    docs = vectorstore.similarity_search_with_score(question, k=4)
+    app = get_graph()
 
-    if not docs:
-        return {
-            "answer": "No relevant documents found.",
-            "chunks": [],
-            "scores": []
-        }
+    initial_state: GraphState = {
+        "question":        question,
+        "domain":          domain,
+        "documents":       [],
+        "generation":      "",
+        "retry_count":     0,
+        "retrieval_grade": "",
+        "hallucination":   "",
+        "answer_grade":    "",
+        "final_answer":    ""
+    }
 
-    # Step 2 — Format context
-    context = "\n\n---\n\n".join([
-        f"Source: {doc.metadata.get('filename','unknown')}\n{doc.page_content}"
-        for doc, score in docs
-    ])
-
-    # Step 3 — Generate
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", """You are a helpful assistant for {domain} questions.
-Answer ONLY using the provided context below.
-If the context does not contain enough information, say:
-"I don't have enough information in my knowledge base to answer this."
-
-Always cite which source document your answer comes from.
-
-Context:
-{context}"""),
-        ("human", "{question}")
-    ])
-
-    chain  = prompt | load_llm() | StrOutputParser()
-    answer = chain.invoke({
-        "domain":   domain,
-        "context":  context,
-        "question": question
-    })
+    final_state = app.invoke(initial_state)
 
     return {
-        "answer": answer,
-        "chunks": [doc for doc, score in docs],
-        "scores": [round(1 - score, 3) for doc, score in docs]
+        "answer":       final_state["final_answer"],
+        "chunks":       final_state["documents"],
+        "retry_count":  final_state["retry_count"]
     }
 
 # ── UI ────────────────────────────────────────────────────────
 st.title("🔬 Self-Healing RAG System")
-st.caption("Phase 2 — Basic RAG · Self-healing loop coming in Phase 3")
+st.caption("Phase 3 — Self-Healing LangGraph Pipeline")
 
 # Sidebar
 with st.sidebar:
@@ -120,17 +68,16 @@ with st.sidebar:
     st.markdown("⏳ health — not yet")
 
     st.divider()
-    st.caption("Phase 3 will add: hallucination detection, auto-retry, confidence scores")
+    st.caption("Self-healing: hallucination detection + auto-retry + query reformulation")
 
 # Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
-    # Welcome message
     st.session_state.messages.append({
-        "role":    "assistant",
-        "content": "Hello! Ask me anything about Python documentation. I will answer only from verified sources.",
-        "chunks":  [],
-        "scores":  []
+        "role":        "assistant",
+        "content":     "Hello! Ask me anything about Python documentation. I will answer only from verified sources.",
+        "chunks":      [],
+        "retry_count": 0
     })
 
 # Display chat history
@@ -138,15 +85,15 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+        # Show retries badge for assistant messages
+        if msg["role"] == "assistant" and msg.get("retry_count", 0) > 0:
+            st.caption(f"🔄 Self-healed — retries used: {msg['retry_count']}")
+
         # Show sources for assistant messages
         if msg["role"] == "assistant" and msg.get("chunks"):
             with st.expander(f"📄 Sources ({len(msg['chunks'])} chunks retrieved)"):
-                for i, (chunk, score) in enumerate(
-                    zip(msg["chunks"], msg["scores"])
-                ):
-                    col1, col2 = st.columns([3, 1])
-                    col1.markdown(f"**Chunk {i+1}** — `{chunk.metadata.get('filename','?')[:45]}`")
-                    col2.metric("Score", score)
+                for i, chunk in enumerate(msg["chunks"]):
+                    st.markdown(f"**Chunk {i+1}** — `{chunk.metadata.get('filename', '?')[:45]}`")
                     st.caption(chunk.page_content[:300] + "...")
                     st.divider()
 
@@ -156,34 +103,34 @@ if question := st.chat_input(f"Ask about {domain}..."):
     # Show user message
     st.session_state.messages.append({
         "role": "user", "content": question,
-        "chunks": [], "scores": []
+        "chunks": [], "retry_count": 0
     })
     with st.chat_message("user"):
         st.markdown(question)
 
-    # Get answer
+    # Get answer from self-healing graph
     with st.chat_message("assistant"):
         with st.spinner("Searching knowledge base..."):
             result = get_answer(question, domain)
 
         st.markdown(result["answer"])
 
+        # Show retries badge
+        if result["retry_count"] > 0:
+            st.caption(f"🔄 Self-healed — retries used: {result['retry_count']}")
+
         # Show sources
         if result["chunks"]:
             with st.expander(f"📄 Sources ({len(result['chunks'])} chunks retrieved)"):
-                for i, (chunk, score) in enumerate(
-                    zip(result["chunks"], result["scores"])
-                ):
-                    col1, col2 = st.columns([3, 1])
-                    col1.markdown(f"**Chunk {i+1}** — `{chunk.metadata.get('filename','?')[:45]}`")
-                    col2.metric("Score", score)
+                for i, chunk in enumerate(result["chunks"]):
+                    st.markdown(f"**Chunk {i+1}** — `{chunk.metadata.get('filename', '?')[:45]}`")
                     st.caption(chunk.page_content[:300] + "...")
                     st.divider()
 
     # Save to history
     st.session_state.messages.append({
-        "role":    "assistant",
-        "content": result["answer"],
-        "chunks":  result["chunks"],
-        "scores":  result["scores"]
+        "role":        "assistant",
+        "content":     result["answer"],
+        "chunks":      result["chunks"],
+        "retry_count": result["retry_count"]
     })
