@@ -268,38 +268,164 @@ def route_after_grading(
 # Replace one by one tomorrow.
 # ============================================================
 
+HALLUCINATION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system","""You are a hallucination detector for AI-generated answer.messages
+     
+Your job : check if every clain in the answer is supported by the source documents.messages
+     
+Rules:
+-Read the source documents carefully
+-Check each claim in the answer against the documents
+-If ALL claims are backed by the documents -> return: grounded
+-If ANY claim is NOT in the documents -> return: hallucinated
+-If the answer says "I don't have enough information" -> return: grounded
+ (honest abstention is always correct behaviour)
+     
+Return ONLY one word: grounded or hallucinated
+No explanation. No punctuation. Just the single word."""    ),
+    ("human", """Source documents:
+{documents}
+
+Generated answer:
+{generation}
+
+Your verdict (grounded or hallucinated):""")
+
+
+])
+
+
+hallucination_critic = HALLUCINATION_PROMPT | GROQ_FAST | StrOutputParser()
+
 def check_hallucination(state: GraphState) -> dict:
     """
-    PLACEHOLDER — Phase 3 Day 2
-    For now: assume all generations are grounded.
-    Tomorrow: LLM critic checks every claim.
+    The core of self-healing - detects if the answer
+    contains claims not supported by reterived documents.
     """
-    print(f"\n[NODE 4 — HALLUCINATION CHECK] placeholder → grounded")
-    return {"hallucination": "grounded"}
+    print(f"\n[NODE 4 — HALLUCINATION CRITIC]")
+
+    documents = state["documents"]
+    generation = state["generation"]
+
+    if not documents:
+        print(f" No documents - skipping critics -> grounded")
+        return {"hallucination": "grounded"}
+
+    if "don't have enough information" in generation.lower():
+        print(f"  Honest abstention detected → grounded")
+        return {"hallucination": "grounded"}
+
+    docs_text = "\n\n---\n\n".join([
+    f"Document {i+1}:\n{doc.page_content[:600]}"
+    for i, doc in enumerate(documents)
+])
+
+    result = hallucination_critic.invoke({
+        "documents": docs_text,
+        "generation": generation
+    }).strip().lower()
+
+    result = result.replace(".", "").replace(".","").strip()
+
+    if result == "grounded":
+        verdict = "grounded"
+    else:
+        verdict = "hallucinated"
+
+    print(f" Critic verdict: {verdict}")
+    return {"hallucination":verdict}
+
+ANSWER_GRADE_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """You are an answer quality evaluator.
+
+Given a user question and an AI-generated answer, decide if the answer
+actually addresses what the user asked.
+
+Rules:
+- If the answer directly addresses the question → return: useful
+- If the answer is about a completely different topic → return: not useful
+- If the answer honestly says it doesn't have information → return: useful
+  (honest abstention is useful — better than a wrong answer)
+
+Return ONLY one word: useful or not useful
+No explanation. No punctuation. Just those exact words."""),
+    ("human", """Question: {question}
+
+Answer: {generation}
+
+Your grade (useful or not useful):""")
+])
+
+answer_grader = ANSWER_GRADE_PROMPT | GROQ_FAST | StrOutputParser()
+
 
 
 def grade_answer(state: GraphState) -> dict:
     """
-    PLACEHOLDER — Phase 3 Day 2
-    For now: assume all answers are useful.
-    Tomorrow: LLM grades answer quality.
+    Final quality gate — checks the answer actually
+    addresses what the user asked.
+    Grounded but off-topic answers get rejected here.
     """
-    print(f"\n[NODE 5 — ANSWER GRADE] placeholder → useful")
-    return {"answer_grade": "useful"}
+    print(f"\n[NODE 5 — ANSWER GRADER]")
+
+    result = answer_grader.invoke({
+        "question":   state["question"],
+        "generation": state["generation"]
+    }).strip().lower()
+
+    # Clean response
+    result = result.replace(".", "").strip()
+
+    if result == "useful":
+        verdict = "useful"
+    else:
+        verdict = "not useful"
+
+    print(f"  Answer grade: {verdict}")
+    return {"answer_grade": verdict}
+
+
+REFORMULATION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """You are a search query optimization expert.
+
+A user's question failed to find relevant documents in a technical knowledge base.
+Your job: rewrite the question to improve search results.
+
+Strategies to use:
+- Use different keywords that mean the same thing
+- Make the question more specific
+- Break a complex question into its core concept
+- Use technical terminology if appropriate
+- Remove ambiguous words
+
+Return ONLY the rewritten question.
+No explanation. No preamble. Just the new question."""),
+    ("human", """Original question that failed: {question}
+
+Rewritten question optimized for search:""")
+])
+
+reformulator = REFORMULATION_PROMPT | GROQ_FAST | StrOutputParser()
 
 
 def reformulate_query(state: GraphState) -> dict:
     """
-    PLACEHOLDER — Phase 3 Day 2
-    For now: add [RETRY] prefix as a simple reformulation.
-    Tomorrow: LLM rewrites query intelligently.
+    Intelligently rewrites the query when retrieval or
+    generation fails. Each retry uses a genuinely different
+    search query — not just a prefix like [RETRY 1].
     """
-    import re
     current_retries = state.get("retry_count", 0)
-    # Strip any existing [RETRY N] prefix to avoid accumulation on multiple retries
-    original_question = re.sub(r'^\[RETRY \d+\]\s*', '', state["question"])
-    new_question      = f"[RETRY {current_retries+1}] {original_question}"
-    print(f"\n[NODE 6 — REFORMULATE] placeholder → {new_question[:60]}")
+    print(f"\n[NODE 6 — REFORMULATE] retry {current_retries + 1}/{MAX_RETRIES}")
+
+    original_question = state["question"]
+
+    new_question = reformulator.invoke({
+        "question": original_question
+    }).strip()
+
+    print(f"  Original:     {original_question[:70]}")
+    print(f"  Reformulated: {new_question[:70]}")
+
     return {
         "question":    new_question,
         "retry_count": current_retries + 1
@@ -456,3 +582,6 @@ if __name__ == "__main__":
 
     # Test 2 — should trigger fallback after retries
     ask("What is the capital of France?")
+
+    # Test 3 — partial information (tests critic + grader together)
+    ask("What is Python's asyncio event loop and how does uvloop compare to it?")
