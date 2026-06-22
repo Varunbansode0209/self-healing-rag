@@ -15,6 +15,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
 import os
+from hybrid_retriever import hybrid_search
 
 load_dotenv()
 
@@ -72,20 +73,15 @@ MAX_RETRIES = 3
 
 def retrieve(state: GraphState) -> dict:
     """
-    Retrieves relevant document chunks from ChromaDB.
-    Uses the current question — which may be reformulated on retry.
+    Node 1 — Hybrid retrieval (BM25 + Vector)
+    Domain-aware weights tuned per knowledge base.
     """
-    print(f"\n[NODE 1 — RETRIEVE] attempt {state['retry_count'] + 1}")
+    print(f"\n[NODE 1 — RETRIEVE HYBRID] attempt {state['retry_count'] + 1}")
     print(f"  Question: {state['question'][:80]}")
 
-    vectorstore = Chroma(
-        persist_directory=f"./chroma_db/{state['domain']}",
-        embedding_function=EMBEDDINGS,
-        collection_name=state["domain"]
-    )
-
-    documents = vectorstore.similarity_search(
-        state["question"],
+    documents = hybrid_search(
+        query=state["question"],
+        domain=state["domain"],
         k=4
     )
 
@@ -180,15 +176,15 @@ def grade_retrieval(state: GraphState) -> dict:
 GENERATION_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """You are a helpful assistant specializing in {domain}.
 
-Answer the question using ONLY the provided context documents below.
-Do not use any external knowledge or training data.
+Answer using ONLY the provided context documents.
 
 Rules:
-- If context contains the answer: provide a clear, detailed answer
-- Always mention which source document supports your answer
-- If context does NOT contain enough information: respond with exactly:
-  "I don't have enough information in my knowledge base to answer this."
-- Never make up information not present in the context
+- Answer every part of the question that is supported by context
+- For parts NOT in context, explicitly say:
+  "Note: My knowledge base does not contain information about [specific topic]."
+- Never fabricate information
+- Always cite which source supports each part of your answer
+- Never refuse the entire question if PART of it can be answered
 
 Context:
 {context}"""),
@@ -269,9 +265,9 @@ def route_after_grading(
 # ============================================================
 
 HALLUCINATION_PROMPT = ChatPromptTemplate.from_messages([
-    ("system","""You are a hallucination detector for AI-generated answer.messages
+    ("system","""You are a hallucination detector for AI-generated answers.
      
-Your job : check if every clain in the answer is supported by the source documents.messages
+Your job: check if every claim in the answer is supported by the source documents.
      
 Rules:
 -Read the source documents carefully
@@ -316,16 +312,16 @@ def check_hallucination(state: GraphState) -> dict:
         return {"hallucination": "grounded"}
 
     docs_text = "\n\n---\n\n".join([
-    f"Document {i+1}:\n{doc.page_content[:600]}"
-    for i, doc in enumerate(documents)
-])
+        f"Document {i+1}:\n{doc.page_content[:600]}"
+        for i, doc in enumerate(documents)
+    ])
 
     result = hallucination_critic.invoke({
         "documents": docs_text,
         "generation": generation
     }).strip().lower()
 
-    result = result.replace(".", "").replace(".","").strip()
+    result = result.replace(".", "").replace(",", "").strip()
 
     if result == "grounded":
         verdict = "grounded"
