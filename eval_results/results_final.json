@@ -1,0 +1,89 @@
+{
+  "config": {
+    "generator_model": "llama-3.1-8b-instant",
+    "judge_model": "llama-3.3-70b-versatile",
+    "dataset": "eval_dataset_v2.json",
+    "n_answerable": 28,
+    "n_ood": 5
+  },
+  "overall": {
+    "baseline": {
+      "faithfulness": 0.611,
+      "relevancy": 0.511,
+      "hallucination_rate": 0.0
+    },
+    "self_healing": {
+      "faithfulness": 0.804,
+      "relevancy": 0.243,
+      "hallucination_rate": 17.9
+    },
+    "improvement": {
+      "faithfulness_abs": 0.193,
+      "faithfulness_pct": 31.6,
+      "hallucination_reduction": -17.9
+    }
+  },
+  "pipeline": {
+    "retry_rate_pct": 14.3,
+    "avg_retries": 0.429,
+    "fallback_rate_pct": 100.0
+  },
+  "by_type": {
+    "A_easy": {
+      "n": 10,
+      "baseline_faith": 0.5,
+      "sh_faith": 0.8,
+      "baseline_relev": 0.5,
+      "sh_relev": 0.21,
+      "avg_retries": 0.0
+    },
+    "B_hard": {
+      "n": 10,
+      "baseline_faith": 0.52,
+      "sh_faith": 0.75,
+      "baseline_relev": 0.54,
+      "sh_relev": 0.26,
+      "avg_retries": 0.0
+    },
+    "C_trick": {
+      "n": 8,
+      "baseline_faith": 0.863,
+      "sh_faith": 0.875,
+      "baseline_relev": 0.487,
+      "sh_relev": 0.263,
+      "avg_retries": 1.5
+    }
+  },
+  "ood_details": [
+    {
+      "question": "How does uvloop improve Python asyncio performance?",
+      "retries": 3,
+      "refused": true,
+      "answer": "I searched my knowledge base thoroughly across multiple attempts but couldn't find reliable information to answer your question accurately. This topic may not be covered in my current document corpus."
+    },
+    {
+      "question": "What is the capital of France?",
+      "retries": 3,
+      "refused": true,
+      "answer": "I searched my knowledge base thoroughly across multiple attempts but couldn't find reliable information to answer your question accurately. This topic may not be covered in my current document corpus."
+    },
+    {
+      "question": "How does Rust handle memory safety without garbage collection?",
+      "retries": 3,
+      "refused": true,
+      "answer": "I searched my knowledge base thoroughly across multiple attempts but couldn't find reliable information to answer your question accurately. This topic may not be covered in my current document corpus."
+    },
+    {
+      "question": "What is the latest stable version of Django?",
+      "retries": 3,
+      "refused": true,
+      "answer": "I searched my knowledge base thoroughly across multiple attempts but couldn't find reliable information to answer your question accurately. This topic may not be covered in my current document corpus."
+    },
+    {
+      "question": "How does React's virtual DOM work?",
+      "retries": 3,
+      "refused": true,
+      "answer": "I searched my knowledge base thoroughly across multiple attempts but couldn't find reliable information to answer your question accurately. This topic may not be covered in my current document corpus."
+    }
+  ]
+}

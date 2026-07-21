@@ -1,19 +1,32 @@
 # Environment variables
 .env
 
-# Raw Datasets / Data sources
+# Raw datasets / source documents
 documents/
 
-# Virtual environment
+# Virtual environments
 venv/
+venv_py313_backup/
 
 # Python cache
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 
-# Vector store 
+# Test / tool caches
+.pytest_cache/
+.mypy_cache/
+
+# Vector store
 chroma_db/
+
+# Temporary/debug files
+freeze.txt
+project_tree.txt
+debug_imports.py
+
+# Evaluation outputs (optional)
+# Uncomment the next line if you DON'T want to track generated results
+# eval_results/
 
 # OS files
 .DS_Store

@@ -1,0 +1,18 @@
+{
+  "baseline": {
+    "faithfulness": 0.646,
+    "relevancy": 0.956,
+    "hallucination_rate": 2.1
+  },
+  "self_healing": {
+    "faithfulness": 0.733,
+    "relevancy": 0.833,
+    "hallucination_rate": 6.2
+  },
+  "improvement": {
+    "faithfulness": 0.087,
+    "hallucination_reduction": -4.1
+  },
+  "avg_retries": 0.0,
+  "n_questions": 48
+}

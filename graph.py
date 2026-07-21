@@ -42,11 +42,22 @@ class GraphState(TypedDict):
 # Load once, reuse across all nodes.
 # ============================================================
 
-EMBEDDINGS = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5",
-    model_kwargs={"device": "cuda"},
-    encode_kwargs={"normalize_embeddings": True}
-)
+# ── LAZY EMBEDDINGS ─────────────────────────────────────────
+# NOT loaded at import time — only when the first query runs.
+# This prevents CUDA from initialising when evaluate.py imports
+# graph.py, which would clash with DeepEval's own torch context.
+_EMBEDDINGS_CACHE = None
+
+def _get_embeddings():
+    global _EMBEDDINGS_CACHE
+    if _EMBEDDINGS_CACHE is None:
+        device = "cpu" if os.environ.get("CUDA_VISIBLE_DEVICES") == "" else "cuda"
+        _EMBEDDINGS_CACHE = HuggingFaceEmbeddings(
+            model_name="BAAI/bge-small-en-v1.5",
+            model_kwargs={"device": device},
+            encode_kwargs={"normalize_embeddings": True}
+        )
+    return _EMBEDDINGS_CACHE
 
 # Groq — free, fast, used for grader + reformulator nodes
 GROQ_FAST = ChatGroq(
@@ -265,29 +276,30 @@ def route_after_grading(
 # ============================================================
 
 HALLUCINATION_PROMPT = ChatPromptTemplate.from_messages([
-    ("system","""You are a hallucination detector for AI-generated answers.
-     
-Your job: check if every claim in the answer is supported by the source documents.
-     
-Rules:
--Read the source documents carefully
--Check each claim in the answer against the documents
--If ALL claims are backed by the documents -> return: grounded
--If ANY claim is NOT in the documents -> return: hallucinated
--If the answer says "I don't have enough information" -> return: grounded
- (honest abstention is always correct behaviour)
-     
-Return ONLY one word: grounded or hallucinated
-No explanation. No punctuation. Just the single word."""    ),
+    ("system", """You are a strict hallucination detector.
+
+Check if EVERY claim in the answer exists EXPLICITLY in the source documents.
+
+Be strict:
+- If the answer adds ANY detail not in the documents → hallucinated
+- If the answer uses outside knowledge not in documents → hallucinated  
+- If the answer correctly says it lacks information → grounded
+- If every claim traces to a specific document → grounded
+
+Common hallucination patterns to catch:
+- Specific numbers or versions not mentioned in documents
+- Comparisons with other tools not discussed in documents
+- Implementation details extrapolated beyond what documents state
+- Confident claims about behavior not explicitly documented
+
+Return ONLY: grounded or hallucinated"""),
     ("human", """Source documents:
 {documents}
 
-Generated answer:
+Answer:
 {generation}
 
-Your verdict (grounded or hallucinated):""")
-
-
+Verdict:""")
 ])
 
 

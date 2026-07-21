@@ -1,0 +1,280 @@
+[
+  {
+    "question": "What is a Python decorator?",
+    "ground_truth": "A decorator is a function that takes another function as argument and returns either the same function or a new object, used to modify or extend function behavior.",
+    "answerable": true
+  },
+  {
+    "question": "How does exception handling work in Python?",
+    "ground_truth": "Python uses try/except blocks. Code in try runs first, if an exception occurs the matching except block runs. else runs if no exception, finally always runs.",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between a list and a tuple?",
+    "ground_truth": "Lists are mutable sequences that can be changed after creation. Tuples are immutable sequences that cannot be changed after creation.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's garbage collection work?",
+    "ground_truth": "Python uses reference counting as primary mechanism. When reference count reaches zero, memory is freed. A cyclic garbage collector handles circular references.",
+    "answerable": true
+  },
+  {
+    "question": "What is the Global Interpreter Lock?",
+    "ground_truth": "The GIL is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecodes simultaneously in CPython.",
+    "answerable": true
+  },
+  {
+    "question": "How do Python generators work?",
+    "ground_truth": "Generators are functions that use yield to return values one at a time, suspending execution between yields. They are memory efficient for large sequences.",
+    "answerable": true
+  },
+  {
+    "question": "What is asyncio in Python?",
+    "ground_truth": "asyncio is a library for writing concurrent code using async/await syntax. It uses an event loop to manage asynchronous tasks and coroutines.",
+    "answerable": true
+  },
+  {
+    "question": "How do context managers work in Python?",
+    "ground_truth": "Context managers implement __enter__ and __exit__ methods. Used with the with statement, they ensure proper resource acquisition and release.",
+    "answerable": true
+  },
+  {
+    "question": "What is a Python metaclass?",
+    "ground_truth": "A metaclass is a class whose instances are classes. It controls class creation and can modify class behavior. type is the default metaclass.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's memory management work?",
+    "ground_truth": "Python manages memory using private heap space. Memory allocation is handled by the Python memory manager. Reference counting tracks object usage.",
+    "answerable": true
+  },
+  {
+    "question": "What are Python type hints?",
+    "ground_truth": "Type hints are annotations that indicate expected types of variables and function parameters. They use syntax like def func(x: int) -> str and are checked by tools like mypy.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's import system work?",
+    "ground_truth": "Python imports search sys.path for modules. The import statement loads modules, packages are directories with __init__.py. Modules are cached in sys.modules.",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between __str__ and __repr__?",
+    "ground_truth": "__str__ returns human-readable string representation. __repr__ returns unambiguous representation for debugging, ideally able to recreate the object.",
+    "answerable": true
+  },
+  {
+    "question": "How do Python descriptors work?",
+    "ground_truth": "Descriptors implement __get__, __set__, or __delete__ methods. They control attribute access and are the mechanism behind properties, methods, and slots.",
+    "answerable": true
+  },
+  {
+    "question": "What is functools.lru_cache?",
+    "ground_truth": "lru_cache is a decorator that caches function results using a Least Recently Used cache. It speeds up functions with repeated calls using same arguments.",
+    "answerable": true
+  },
+  {
+    "question": "What is a Python dataclass?",
+    "ground_truth": "Dataclasses automatically generate __init__, __repr__, and __eq__ methods from class variable annotations. Defined using @dataclass decorator.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python handle multiple inheritance?",
+    "ground_truth": "Python uses C3 linearization algorithm (MRO) to determine method resolution order in multiple inheritance. super() follows the MRO chain.",
+    "answerable": true
+  },
+  {
+    "question": "What is the walrus operator in Python?",
+    "ground_truth": "The walrus operator := allows assignment inside expressions. Introduced in Python 3.8, it assigns and returns a value in the same expression.",
+    "answerable": true
+  },
+  {
+    "question": "What is the capital of France?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+  {
+    "question": "Who is the CEO of OpenAI?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+
+  
+  {
+    "question": "What is a Python decorator?",
+    "ground_truth": "A decorator is a function that takes another function as argument and returns either the same function or a new object.",
+    "answerable": true
+  },
+  {
+    "question": "How does exception handling work in Python?",
+    "ground_truth": "Python uses try/except blocks. Code in try runs first, if exception occurs matching except runs. else runs if no exception, finally always runs.",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between a list and a tuple?",
+    "ground_truth": "Lists are mutable sequences. Tuples are immutable sequences that cannot be changed after creation.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python garbage collection work?",
+    "ground_truth": "Python uses reference counting as primary mechanism. Cyclic garbage collector handles circular references.",
+    "answerable": true
+  },
+  {
+    "question": "What is the Global Interpreter Lock?",
+    "ground_truth": "The GIL is a mutex that protects access to Python objects preventing multiple threads from executing Python bytecodes simultaneously in CPython.",
+    "answerable": true
+  },
+  {
+    "question": "How do Python generators work?",
+    "ground_truth": "Generators use yield to return values one at a time suspending execution between yields. They are memory efficient for large sequences.",
+    "answerable": true
+  },
+  {
+    "question": "What is asyncio in Python?",
+    "ground_truth": "asyncio is a library for writing concurrent code using async/await syntax. It uses an event loop to manage asynchronous tasks and coroutines.",
+    "answerable": true
+  },
+  {
+    "question": "How do context managers work in Python?",
+    "ground_truth": "Context managers implement __enter__ and __exit__ methods. Used with with statement they ensure proper resource acquisition and release.",
+    "answerable": true
+  },
+  {
+    "question": "What is a Python metaclass?",
+    "ground_truth": "A metaclass is a class whose instances are classes. It controls class creation. type is the default metaclass.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python memory management work?",
+    "ground_truth": "Python manages memory using private heap space. Memory allocation handled by Python memory manager. Reference counting tracks object usage.",
+    "answerable": true
+  },
+  {
+    "question": "What are Python type hints?",
+    "ground_truth": "Type hints are annotations indicating expected types of variables and function parameters using syntax like def func(x: int) -> str.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python import system work?",
+    "ground_truth": "Python imports search sys.path for modules. Packages are directories with __init__.py. Modules are cached in sys.modules.",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between __str__ and __repr__?",
+    "ground_truth": "__str__ returns human readable string. __repr__ returns unambiguous representation for debugging ideally able to recreate the object.",
+    "answerable": true
+  },
+  {
+    "question": "How do Python descriptors work?",
+    "ground_truth": "Descriptors implement __get__ __set__ or __delete__ methods controlling attribute access. They are mechanism behind properties methods and slots.",
+    "answerable": true
+  },
+  {
+    "question": "What is functools.lru_cache?",
+    "ground_truth": "lru_cache is a decorator that caches function results using Least Recently Used cache speeding up functions with repeated calls using same arguments.",
+    "answerable": true
+  },
+  {
+    "question": "What is a Python dataclass?",
+    "ground_truth": "Dataclasses automatically generate __init__ __repr__ and __eq__ methods from class variable annotations using @dataclass decorator.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python handle multiple inheritance?",
+    "ground_truth": "Python uses C3 linearization MRO to determine method resolution order. super() follows the MRO chain.",
+    "answerable": true
+  },
+  {
+    "question": "What is the walrus operator in Python?",
+    "ground_truth": "The walrus operator := allows assignment inside expressions. Introduced in Python 3.8 it assigns and returns value in same expression.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python asyncio event loop handle concurrent tasks?",
+    "ground_truth": "The event loop runs coroutines scheduling them when they yield control via await. It manages IO operations without blocking using selectors.",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between threading and multiprocessing in Python?",
+    "ground_truth": "Threading shares memory space but is limited by GIL for CPU tasks. Multiprocessing uses separate memory spaces bypassing GIL for true parallelism.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's weakref module work?",
+    "ground_truth": "weakref creates weak references to objects that do not prevent garbage collection. Useful for caches and mappings without preventing cleanup.",
+    "answerable": true
+  },
+  {
+    "question": "What is Python's abstract base class?",
+    "ground_truth": "Abstract base classes use ABCMeta metaclass and abstractmethod decorator to define interfaces that subclasses must implement.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's struct module work?",
+    "ground_truth": "struct module packs and unpacks binary data according to format strings. Used for working with C structures and binary protocols.",
+    "answerable": true
+  },
+  {
+    "question": "What is Python's collections.OrderedDict?",
+    "ground_truth": "OrderedDict is a dict subclass that remembers insertion order. Since Python 3.7 regular dicts also maintain insertion order.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's pickle module work?",
+    "ground_truth": "pickle serializes Python objects to bytes and deserializes them back. Uses __reduce__ method for custom serialization.",
+    "answerable": true
+  },
+  {
+    "question": "What is Python's __slots__?",
+    "ground_truth": "slots restricts instance attributes to defined list reducing memory usage by replacing instance __dict__ with fixed slots.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's contextlib.contextmanager work?",
+    "ground_truth": "contextmanager decorator converts generator function into context manager. yield separates setup from teardown code.",
+    "answerable": true
+  },
+  {
+    "question": "What is Python's Protocol class?",
+    "ground_truth": "Protocol defines structural subtyping interfaces. Classes implementing required methods satisfy the protocol without explicit inheritance.",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's itertools.chain work?",
+    "ground_truth": "chain takes multiple iterables and returns iterator that yields elements from first then second and so on as single sequence.",
+    "answerable": true
+  },
+  {
+    "question": "What is Python's memoryview?",
+    "ground_truth": "memoryview exposes buffer protocol of objects like bytes and bytearray allowing slice access without copying data.",
+    "answerable": true
+  },
+  {
+    "question": "How does uvloop improve asyncio performance?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+  {
+    "question": "What is the capital of France?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+  {
+    "question": "Who created the Django framework?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+  {
+    "question": "What is the latest version of FastAPI?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  },
+  {
+    "question": "How does Rust handle memory safety?",
+    "ground_truth": "N/A — not in corpus",
+    "answerable": false
+  }
+
+]

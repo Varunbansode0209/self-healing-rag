@@ -4,7 +4,7 @@
 # Developer docs  → vector only (BGE sufficient)
 # Legal/Finance/Health → hybrid (BM25 + vector)
 # ============================================================
-
+import os
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.retrievers import BM25Retriever
@@ -15,11 +15,21 @@ import hashlib
 
 load_dotenv()
 
-EMBEDDINGS = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5",
-    model_kwargs={"device": "cuda"},
-    encode_kwargs={"normalize_embeddings": True}
-)
+# ── LAZY EMBEDDINGS ─────────────────────────────────────────
+# Deferred until first call so importing this module does NOT
+# trigger CUDA initialisation (fixes segfault with DeepEval).
+_EMBEDDINGS_CACHE = None
+
+def _get_embeddings():
+    global _EMBEDDINGS_CACHE
+    if _EMBEDDINGS_CACHE is None:
+        device = "cpu" if os.environ.get("CUDA_VISIBLE_DEVICES") == "" else "cuda"
+        _EMBEDDINGS_CACHE = HuggingFaceEmbeddings(
+            model_name="BAAI/bge-small-en-v1.5",
+            model_kwargs={"device": device},
+            encode_kwargs={"normalize_embeddings": True}
+        )
+    return _EMBEDDINGS_CACHE
 
 CHROMA_BASE = "./chroma_db"
 
@@ -56,7 +66,7 @@ def load_all_documents(domain: str) -> list[Document]:
     """Loads all chunks from ChromaDB for BM25 indexing."""
     vectorstore = Chroma(
         persist_directory=f"{CHROMA_BASE}/{domain}",
-        embedding_function=EMBEDDINGS,
+        embedding_function=_get_embeddings(),
         collection_name=domain
     )
 
@@ -88,7 +98,7 @@ def build_retriever(domain: str, k: int = 4):
     # Vector retriever
     vectorstore = Chroma(
         persist_directory=f"{CHROMA_BASE}/{domain}",
-        embedding_function=EMBEDDINGS,
+        embedding_function=_get_embeddings(),
         collection_name=domain
     )
     vector_retriever = vectorstore.as_retriever(

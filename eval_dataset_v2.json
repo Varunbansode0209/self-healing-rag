@@ -1,0 +1,200 @@
+[
+  {
+    "question": "What is a Python decorator?",
+    "ground_truth": "A decorator is a function that takes another function as argument and returns either the same function or a new object.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "How does exception handling work in Python?",
+    "ground_truth": "Python uses try/except blocks. Code in try runs first, if exception occurs matching except runs. else runs if no exception, finally always runs.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between a list and a tuple?",
+    "ground_truth": "Lists are mutable sequences. Tuples are immutable and cannot be changed after creation.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "How do generators work in Python?",
+    "ground_truth": "Generators use yield to return values one at a time suspending execution between yields. They are memory efficient for large sequences.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is asyncio in Python?",
+    "ground_truth": "asyncio is a library for writing concurrent code using async/await syntax. It uses an event loop to manage asynchronous tasks and coroutines.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is the Global Interpreter Lock?",
+    "ground_truth": "The GIL is a mutex that protects access to Python objects preventing multiple threads from executing Python bytecodes simultaneously in CPython.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is functools.lru_cache?",
+    "ground_truth": "lru_cache is a decorator that caches function results using Least Recently Used cache speeding up functions with repeated calls using same arguments.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is a Python dataclass?",
+    "ground_truth": "Dataclasses automatically generate __init__ __repr__ and __eq__ methods from class variable annotations using @dataclass decorator.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "How does Python handle multiple inheritance?",
+    "ground_truth": "Python uses C3 linearization MRO to determine method resolution order. super() follows the MRO chain.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What is the walrus operator in Python?",
+    "ground_truth": "The walrus operator := allows assignment inside expressions. Introduced in Python 3.8 it assigns and returns value in same expression.",
+    "type": "A_easy",
+    "answerable": true
+  },
+  {
+    "question": "What specific error does Python raise when you access index 5 of a 3-element list?",
+    "ground_truth": "Python raises IndexError: list index out of range when accessing an index that does not exist in the list.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What is the exact default recursion limit in CPython and which function changes it?",
+    "ground_truth": "The default recursion limit is 1000 in CPython. sys.setrecursionlimit() changes it.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What happens to a Python generator after it raises StopIteration?",
+    "ground_truth": "After StopIteration is raised the generator is exhausted and all subsequent calls to next() will also raise StopIteration.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between __new__ and __init__ in Python?",
+    "ground_truth": "__new__ creates the instance and is called first. __init__ initializes the instance after creation. __new__ returns the instance, __init__ does not.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's super() work with multiple inheritance?",
+    "ground_truth": "super() follows the MRO (Method Resolution Order) determined by C3 linearization. It returns a proxy object that delegates method calls to the next class in MRO.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between os.path.join and pathlib.Path in Python?",
+    "ground_truth": "os.path.join concatenates path components as strings. pathlib.Path provides object-oriented path manipulation with methods and operators.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's __missing__ method work in dict subclasses?",
+    "ground_truth": "__missing__ is called by dict.__getitem__ when a key is not found. It allows custom behavior instead of raising KeyError.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between deepcopy and copy in Python?",
+    "ground_truth": "copy creates a shallow copy where nested objects are references. deepcopy recursively copies all nested objects creating completely independent copies.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's struct.pack work with byte order?",
+    "ground_truth": "struct.pack converts Python values to bytes using format strings. Byte order is specified with prefix: < little-endian, > big-endian, = native, ! network.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "What is the exact behavior of Python's is operator vs == operator?",
+    "ground_truth": "== checks value equality using __eq__. is checks identity meaning both variables point to the exact same object in memory.",
+    "type": "B_hard",
+    "answerable": true
+  },
+  {
+    "question": "In Python 3.14 what new features were added to the typing module?",
+    "ground_truth": "Python 3.14 typing module additions include improvements to type parameter syntax and enhanced support for generic types.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "What is the performance difference between Python list append and deque append?",
+    "ground_truth": "list.append is O(1) amortized. deque.append is O(1) always. deque.appendleft is O(1) while list has no efficient left append.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "How does Python 3.14 improve error messages compared to Python 3.10?",
+    "ground_truth": "Python has progressively improved error messages since 3.10 with more precise error locations and suggestions for common mistakes.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "What is the memory usage difference between a Python list and a tuple with the same elements?",
+    "ground_truth": "Tuples use less memory than lists because they are immutable and Python can optimize their storage. Lists have extra capacity for growth.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's hash randomization affect dictionary ordering?",
+    "ground_truth": "Since Python 3.7 dictionaries maintain insertion order regardless of hash values. Hash randomization affects set ordering but not dict ordering.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "What is the difference between Python's threading.Lock and threading.RLock?",
+    "ground_truth": "Lock is a basic mutex that cannot be acquired twice by the same thread. RLock is reentrant and can be acquired multiple times by the same thread.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "How does Python's property decorator differ from using __getattr__?",
+    "ground_truth": "property creates a descriptor for specific named attributes with explicit getter setter and deleter. __getattr__ is called for any attribute not found through normal means.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "What happens when Python's garbage collector detects a reference cycle?",
+    "ground_truth": "The cyclic garbage collector identifies groups of objects with circular references where the total reference count from outside is zero and frees all of them.",
+    "type": "C_trick",
+    "answerable": true
+  },
+  {
+    "question": "How does uvloop improve Python asyncio performance?",
+    "ground_truth": "N/A — not in corpus",
+    "type": "D_out_of_domain",
+    "answerable": false
+  },
+  {
+    "question": "What is the capital of France?",
+    "ground_truth": "N/A — not in corpus",
+    "type": "D_out_of_domain",
+    "answerable": false
+  },
+  {
+    "question": "How does Rust handle memory safety without garbage collection?",
+    "ground_truth": "N/A — not in corpus",
+    "type": "D_out_of_domain",
+    "answerable": false
+  },
+  {
+    "question": "What is the latest stable version of Django?",
+    "ground_truth": "N/A — not in corpus",
+    "type": "D_out_of_domain",
+    "answerable": false
+  },
+  {
+    "question": "How does React's virtual DOM work?",
+    "ground_truth": "N/A — not in corpus",
+    "type": "D_out_of_domain",
+    "answerable": false
+  }
+]
